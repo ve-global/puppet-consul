@@ -11,6 +11,7 @@ describe 'consul' do
       :kernel                 => 'Linux',
       :ipaddress_lo           => '127.0.0.1',
       :consul_version         => 'unknown',
+      :consul_downloaddir     => '/opt/puppet-archive'
     }
   end
   Puppet::Util::Log.level = :debug
@@ -399,7 +400,7 @@ describe 'consul' do
     }}
     it {
       should contain_exec('reload consul service').
-        with_command('consul reload -rpc-addr=127.0.0.1:8400')
+        with_command('consul reload -rpc-addr 127.0.0.1:8400')
     }
   end
 
@@ -419,7 +420,7 @@ describe 'consul' do
     }}
     it {
       should contain_exec('reload consul service').
-        with_command('consul reload -rpc-addr=consul.example.com:9999')
+        with_command('consul reload -rpc-addr consul.example.com:9999')
     }
   end
 
@@ -434,7 +435,7 @@ describe 'consul' do
     }}
     it {
       should contain_exec('reload consul service').
-        with_command('consul reload -rpc-addr=192.168.34.56:8400')
+        with_command('consul reload -rpc-addr 192.168.34.56:8400')
     }
   end
 

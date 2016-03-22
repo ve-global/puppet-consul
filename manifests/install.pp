@@ -4,8 +4,18 @@
 #
 class consul::install {
 
-  if $::consul::data_dir {
-    file { $::consul::data_dir:
+  # need to deal with bin_dir creation ahead of download for Windows
+  if $::operatingsystem == 'windows' {
+    file {[
+      "${consul::bin_dir}/",
+      "${consul::bin_dir}/logs",
+    ]:
+      ensure => 'directory',
+    }
+  }
+
+  if $consul::data_dir {
+    file { $consul::data_dir:
       ensure => 'directory',
       owner  => $::consul::user,
       group  => $::consul::group,
@@ -13,7 +23,23 @@ class consul::install {
     }
   }
 
-  case $::consul::install_method {
+  $install_path = $::consul_downloaddir
+
+  case $::operatingsystem {
+    'windows': {
+      $binary_name = 'consul.exe'
+      $binary_owner = 'Administrators'
+      $binary_group = 'Users'
+    }
+    default: {
+      $binary_name = 'consul'
+      $binary_owner = 'root'
+      # 0 instead of root because OS X uses "wheel".
+      $binary_group = 0
+    }
+  }
+
+  case $consul::install_method {
     'url': {
       $install_prefix = pick($::consul::config_hash[data_dir], '/opt/consul')
       $install_path = pick($::consul::archive_path, "${install_prefix}/archives")
@@ -39,17 +65,17 @@ class consul::install {
         source       => $::consul::real_download_url,
         extract      => true,
         extract_path => "${install_path}/consul-${consul::version}",
-        creates      => "${install_path}/consul-${consul::version}/consul",
+        creates      => "${install_path}/consul-${consul::version}/${binary_name}",
       }->
       file {
-        "${install_path}/consul-${consul::version}/consul":
-          owner => 'root',
-          group => 0, # 0 instead of root because OS X uses "wheel".
+        "${install_path}/consul-${consul::version}/${$binary_name}":
+          owner => $binary_owner,
+          group => $binary_group,
           mode  => '0555';
-        "${consul::bin_dir}/consul":
+        "${consul::bin_dir}/${$binary_name}":
           ensure => link,
           notify => $do_notify_service,
-          target => "${install_path}/consul-${consul::version}/consul";
+          target => "${install_path}/consul-${consul::version}/${$binary_name}";
       }
 
       if ($::consul::ui_dir and $::consul::data_dir) {
