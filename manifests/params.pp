@@ -6,10 +6,8 @@
 class consul::params {
   $acls                  = {}
   $archive_path          = ''
-  $bin_dir               = '/usr/local/bin'
   $checks                = {}
   $config_defaults       = {}
-  $config_dir            = '/etc/consul'
   $config_hash           = {}
   $config_mode           = '0660'
   $download_extension    = 'zip'

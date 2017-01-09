@@ -23,8 +23,6 @@ class consul::install {
     }
   }
 
-  $install_path = $::consul_downloaddir
-
   case $::operatingsystem {
     'windows': {
       $binary_name = 'consul.exe'
@@ -41,7 +39,7 @@ class consul::install {
 
   case $consul::install_method {
     'url': {
-      $install_prefix = pick($::consul::config_hash[data_dir], '/opt/consul')
+      $install_prefix = pick($::consul::config_hash[data_dir], $::consul_downloaddir)
       $install_path = pick($::consul::archive_path, "${install_prefix}/archives")
 
       # only notify if we are installing a new version (work around for switching to archive module)
