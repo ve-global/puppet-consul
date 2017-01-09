@@ -54,8 +54,8 @@ class consul::install {
         $install_path,
         "${install_path}/consul-${consul::version}"]:
         ensure => directory,
-        owner  => 'root',
-        group  => 0, # 0 instead of root because OS X uses "wheel".
+        owner  => $binary_owner,
+        group  => $binary_group,
         mode   => '0555';
       }->
       archive { "${install_path}/consul-${consul::version}.${consul::download_extension}":
